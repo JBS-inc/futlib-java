@@ -5,7 +5,6 @@
  */
 package model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,10 +46,6 @@ public class User {
 
     public int getPoints() {
         return points;
-    }
-
-    public void scanCode(String qrCode) {
-        
     }
 
     public void setAchievements(List<Achievement> achievements) {

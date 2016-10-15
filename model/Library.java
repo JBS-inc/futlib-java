@@ -63,7 +63,9 @@ public class Library {
     }
     
     public boolean createAchievement(String name, String desc, long expires, boolean secret, int points) {
-        created_achievements.add(Achievement.createNewForLib(name, desc, expires, secret, points));
+        Achievement newach = Achievement.createNewForLib(name, desc, expires, secret, points);
+        created_achievements.add(newach);
+        achievements.add(newach);
         return true;
     }
     

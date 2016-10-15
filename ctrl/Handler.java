@@ -8,7 +8,7 @@ package ctrl;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-
+import java.util.UUID;
 
 /**
  *
@@ -40,4 +40,8 @@ public abstract class Handler {
         return READY;
     }
 
+   
+    
+    
+   
 }

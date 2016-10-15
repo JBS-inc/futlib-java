@@ -28,10 +28,10 @@ public class UserHandler extends Handler {
     
     public void loadUser(String name, String password) {
         
-        String answer = httpsHandler.contactServer("echo", "", "Requesting user authentication"); //TODO
+        String answer = httpsHandler.contactServer("user/get/", "name=" + name + "&password=" + password, ""); //TODO
         //TODO parse answer
         
-        user = new User(0, "Perry", "testpw", 10);
+        user = new User(0, "Jack", "testpw", 10);
         lib_id = 0;
         
         READY = true;
@@ -41,19 +41,54 @@ public class UserHandler extends Handler {
         lib_id = library_id;
     }
         
-    public void loadAchievements() {
-        // use name and pw to do this
+    public boolean loadAchievements() {
         if(user == null)
-            return;
+            return false;
 
-         /** TODO load data */
-        String rawdata = httpsHandler.contactServer("achievements/get", "libid=" + lib_id + "&exp=0", "");
-        System.out.println("Server answer: " + rawdata);
+        /** load data */
+        //String answer = httpsHandler.contactServer("user/achievements/", "userid=" + user.getId() + "&libid=" + lib_id, "");
+        String answer = httpsHandler.contactServer("echo/", "userid=" + user.getId() + "&libid=" + lib_id, "This is from the App");
         
-        List<Achievement> achs = new ArrayList();
-        //TODO load data
+        //System.out.println("Server answer: " + answer);
+        
+         /** Check connection success */
+        if(answer.equals(HTTPSHandler.ERROR_NORESPONSE) || answer.equals(HTTPSHandler.ERROR_INVALID))
+            return false;
+        
+       // List<Achievement> achs = jsonHandler.parseAchievements(answer);
+
+        user.setAchievements(new ArrayList<Achievement>());
+        return true;
+    }
+    
+    public boolean handleQRscan(String qrCode) {
+        if(user == null)
+            return false;
+        
+        /** load data */
+        String answer = httpsHandler.contactServer("user/qr/", "userid=" + user.getId() + "&uuid=" + qrCode, "");
+        //System.out.println("Server answer: " + answer);
+        
+         /** Check connection success */
+        if(answer.equals(HTTPSHandler.ERROR_NORESPONSE) || answer.equals(HTTPSHandler.ERROR_INVALID))
+            return false;
+        
+        List<Achievement> achs = jsonHandler.parseAchievements(answer);
 
         user.setAchievements(achs);
+        return true;
+    }
+    
+    public List<Achievement> getAchievements() {
+        return user.getAchievements();
+    }
+    
+    public String getName() {
+        return user.getName();
+    }
+   
+    public int getPoints() {
+        return user.getPoints();
     }
     
 }

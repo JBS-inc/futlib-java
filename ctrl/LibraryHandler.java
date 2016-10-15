@@ -5,7 +5,7 @@
  */
 package ctrl;
 
-import java.util.ArrayList;
+
 import java.util.List;
 import model.Achievement;
 import model.Library;
@@ -22,12 +22,20 @@ public class LibraryHandler extends Handler {
         super(url);
     }
     
-    public void loadLibrary(String name, String password) {
+    public boolean loadLibrary(String name, String password) {
         
         String answer = httpsHandler.contactServer("echo", "", "Requesting library authentication"); //TODO
+        //System.out.println("Server answer: " + answer);
+         
+        /** Check connection success */
+        if(answer.equals(HTTPSHandler.ERROR_NORESPONSE) || answer.equals(HTTPSHandler.ERROR_INVALID))
+            return false;
+        
         //TODO parse answer
-        library = new Library(1, "test", "testpw");
+        library = new Library(0, "Scottish Library", "testpw");
         READY = true;
+        
+        return true;
     }
     
     public boolean createAchievement(String name, String desc, boolean secret, int points) {
@@ -37,48 +45,92 @@ public class LibraryHandler extends Handler {
     /**
      * Sends general, ie points/hour data.
      */
-    public void sendData() {
+    public boolean sendData() {
         /** contact server */
         String answer = httpsHandler.contactServer("library/setpph/", "pph="+library.getPointsPerHour() , "");
+        //System.out.println("Server answer: " + answer);
+         
+        /** Check connection success */
+        if(answer.equals(HTTPSHandler.ERROR_NORESPONSE) || answer.equals(HTTPSHandler.ERROR_INVALID))
+            return false;
         
-        
-        System.out.println("Server answer: " + answer);
+        return true;
     }
     
-    public void sendCreatedAchievements() {
+    public boolean sendCreatedAchievements() {
+        if(library == null)
+            return false;
+         
         /** contact server */
-        String answer = httpsHandler.contactServer("achievements/add/", "" , "" + jsonHandler.parseAchievements(library.getCreated_achievements()));
+        String answer = httpsHandler.contactServer("achievements/add/", "libid=" + library.getId() , "" + jsonHandler.parseAchievements(library.getCreated_achievements()));
+        //System.out.println("Server answer: " + answer);
+         
+        /** Check connection success */
+        if(answer.equals(HTTPSHandler.ERROR_NORESPONSE) || answer.equals(HTTPSHandler.ERROR_INVALID))
+            return false;
+        
         /** clear created achivements list, as they have been sent to server */
         library.clearCreatedAchievements();
-        
-        System.out.println("Server answer: " + answer);
+        return true;
     }
     
-    public void loadAchievements() {
-        // use name and pw to do this
+    public boolean resetQRcode(String uuid) {
+         if(library == null)
+            return false;
+         
+         /** contact server */
+        String answer = httpsHandler.contactServer("achievements/reset/", "uuid=" + uuid, "");
+        //System.out.println("Server answer: " + answer);
+         
+        /** Check connection success */
+        if(answer.equals(HTTPSHandler.ERROR_NORESPONSE) || answer.equals(HTTPSHandler.ERROR_INVALID))
+            return false;
+        
+        return true;
+    }
+    
+    public boolean loadAchievements() {
         if(library == null)
-            return;
+            return false;
 
-         /** TODO load data */
-        String rawdata = httpsHandler.contactServer("achievements/get/", "libid=" + library.getId() + "&expired=true", "");
-        System.out.println("Server answer: " + rawdata);
+        /** load data */
+        String answer = httpsHandler.contactServer("achievements/get/", "libid=" + library.getId() + "&expired=true", "");
+        //System.out.println("Server answer: " + answer);
         
+         /** Check connection success */
+        if(answer.equals(HTTPSHandler.ERROR_NORESPONSE) || answer.equals(HTTPSHandler.ERROR_INVALID))
+            return false;
         
-        
-        List<Achievement> achs = jsonHandler.parseAchievements(rawdata);
-        //TODO load data
+        List<Achievement> achs = jsonHandler.parseAchievements(answer);
 
         library.setAchievements(achs);
-        
+        return true;
     }
     
-    public void loadData() {
-        String rawdata = httpsHandler.contactServer("library/getpph/", "libid="+library.getId(), "");
-       
+    public boolean loadData() {
+        if(library == null)
+            return false;
+        
+        /** load data */
+        String answer = httpsHandler.contactServer("library/getpph/", "libid="+library.getId(), "");
+        //System.out.println("Server answer: " + answer);
+        
+         /** Check connection success */
+        if(answer.equals(HTTPSHandler.ERROR_NORESPONSE) || answer.equals(HTTPSHandler.ERROR_INVALID))
+            return false;
+        
         //int value = Integer.parseInt(rawdata); //TODO
         int value = 20;
         library.setPointsperhour(value);
+        return true;
     }
+    
+    public boolean requestQRcode(String uuid) {
+        httpsHandler.downloadQRcode(uuid);
+        
+        return true;
+    }
+    
    
     public int getPointsPerHour() {
         return library.getPointsPerHour();
@@ -88,4 +140,7 @@ public class LibraryHandler extends Handler {
         return library.getAchievements();
     }
     
+    public String getName() {
+        return library.getName();
+    }
 }

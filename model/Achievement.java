@@ -27,27 +27,28 @@ public class Achievement {
     /** used for the app */
     boolean solved;
       
-    private Achievement(int id, String name, String desc, long expires, long created, boolean secret, int points, boolean solved) {
+    private Achievement(int id, String uuid, String name, String desc, long expires, long created, boolean secret, int points, boolean solved) {
         this.id = id;
+        this.uuid = uuid;
         this.name = name;
         this.desc = desc;
-        this.expires = expires * 1000;
-        this.created = created * 1000;
+        this.expires = expires;
+        this.created = created;
         this.secret = secret;
         this.points = points;
         this.solved = solved;
     }
     
     public static Achievement createNewForLib(String name, String desc, long expires, boolean secret, int points) {
-        return new Achievement(0 , name, desc, expires * 1000, 0, secret, points, false);
+        return new Achievement(-1 , null, name, desc, expires, 0, secret, points, false);
     }
     
-    public static Achievement createNewForLib(int id, String name, String desc, long expires, long created, boolean secret, int points) {
-        return new Achievement(id, name, desc, expires * 1000, created * 1000, secret, points, false);
+    public static Achievement createNewForLib(int id, String uuid, String name, String desc, long expires, long created, boolean secret, int points) {
+        return new Achievement(id, uuid, name, desc, expires, created, secret, points, false);
     }
     
-    public static Achievement createNewForApp(int id, String name, String desc, long expires, long created, boolean secret, int points, boolean solved) {
-        return new Achievement(id, name, desc, expires * 1000, created * 1000, secret, points, solved);
+    public static Achievement createNewForApp(int id, String uuid, String name, String desc, long expires, long created, boolean secret, int points, boolean solved) {
+        return new Achievement(id, uuid, name, desc, expires, created, secret, points, solved);
     }
 
     public int getId() {
@@ -82,6 +83,10 @@ public class Achievement {
         return secret;
     }
 
+    public boolean isSolved() {
+        return solved;
+    }
+    
     @Override
     public String toString() {
         String s = "";
